@@ -1,65 +1,433 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
+
+const NO_PHRASES = [
+  "No",
+  "Are you sure?",
+  "Really sure?",
+  "Think again!",
+  "Last chance!",
+  "Pretty please? 🥺",
+  "Don't do this to me!",
+  "I'll cry... 😢",
+  "You're breaking my heart! 💔",
+  "Okay fine, I won't ask again...",
+  "Just kidding, PLEASE? 🙏",
+  "I'll make you cookies! 🍪",
+  "What if I said pretty pretty please?",
+  "With a cherry on top? 🍒",
+  "I knew you'd say yes! 😏",
+];
+
+const ASKING_GIF = "/giphy.gif";
+const CELEBRATE_GIF = "/giphy-celebrate.gif";
+
+function FloatingHearts() {
+  const hearts = ["💕", "💗", "💖", "❤️", "🩷", "💘", "💝", "🌸", "✨", "💓"];
+  return (
+    <div className="floating-hearts">
+      {hearts.map((heart, i) => (
+        <span key={i} className="floating-heart">
+          {heart}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function fireConfetti() {
+  const colors = ["#e11d48", "#f472b6", "#fda4af", "#fecdd3", "#ff6b9d"];
+
+  // Center burst
+  confetti({
+    particleCount: 100,
+    spread: 80,
+    origin: { y: 0.6, x: 0.5 },
+    colors,
+    shapes: ["circle"],
+    scalar: 1.2,
+  });
+
+  // Left burst
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.65 },
+      colors,
+      shapes: ["circle"],
+      scalar: 1,
+    });
+  }, 250);
+
+  // Right burst
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.65 },
+      colors,
+      shapes: ["circle"],
+      scalar: 1,
+    });
+  }, 400);
+
+  // Delayed top shower
+  setTimeout(() => {
+    confetti({
+      particleCount: 150,
+      spread: 160,
+      origin: { y: 0, x: 0.5 },
+      colors,
+      gravity: 0.6,
+      scalar: 1.4,
+      drift: 0,
+      ticks: 300,
+    });
+  }, 700);
+}
+
+function CelebratingHearts() {
+  const hearts = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    emoji: ["💕", "💗", "💖", "❤️", "🩷", "✨"][i % 6],
+    x: Math.random() * 100,
+    delay: Math.random() * 3,
+    duration: 4 + Math.random() * 4,
+    size: 16 + Math.random() * 24,
+  }));
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {hearts.map((h) => (
+        <motion.span
+          key={h.id}
+          className="absolute"
+          style={{ left: `${h.x}%`, fontSize: h.size, bottom: -40 }}
+          animate={{
+            y: [0, -window.innerHeight - 100],
+            rotate: [0, 360],
+            opacity: [0, 0.8, 0.6, 0],
+          }}
+          transition={{
+            duration: h.duration,
+            delay: h.delay,
+            repeat: Infinity,
+            ease: "easeOut",
+            type: "tween",
+          }}
+        >
+          {h.emoji}
+        </motion.span>
+      ))}
+    </div>
+  );
+}
 
 export default function Home() {
+  const [accepted, setAccepted] = useState(false);
+  const [noCount, setNoCount] = useState(0);
+  const [noText, setNoText] = useState("No");
+  const [noPosition, setNoPosition] = useState({ x: 0, y: 0 });
+  const [isNoEscaping, setIsNoEscaping] = useState(false);
+
+  const yesScale = Math.min(1 + noCount * 0.18, 3.5);
+  const glowIntensity = Math.min(noCount * 8, 60);
+
+  const evadeNo = useCallback(() => {
+    const padding = 100;
+    const btnW = 160;
+    const btnH = 60;
+    const maxX = window.innerWidth - btnW - padding;
+    const maxY = window.innerHeight - btnH - padding;
+    const newX = padding + Math.random() * (maxX - padding);
+    const newY = padding + Math.random() * (maxY - padding);
+    setNoPosition({ x: newX, y: newY });
+    setIsNoEscaping(true);
+    setNoCount((prev) => {
+      const next = prev + 1;
+      setNoText(NO_PHRASES[Math.min(next, NO_PHRASES.length - 1)]);
+      return next;
+    });
+  }, []);
+
+  const handleYes = useCallback(() => {
+    setAccepted(true);
+    fireConfetti();
+    // Second wave of confetti
+    setTimeout(fireConfetti, 1500);
+  }, []);
+
+  // SSR guard for window usage
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="animated-gradient min-h-screen relative overflow-hidden">
+      <FloatingHearts />
+
+      <AnimatePresence mode="wait">
+        {!accepted ? (
+          <motion.main
+            key="asking"
+            className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
+            transition={{ duration: 0.5 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {/* Heading */}
+            <motion.h1
+              className="text-4xl md:text-6xl lg:text-7xl font-bold text-center"
+              style={{
+                fontFamily: "var(--font-dancing-script), cursive",
+                color: "#9f1239",
+              }}
+              initial={{ opacity: 0, y: -40, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 100,
+                damping: 12,
+                delay: 0.2,
+              }}
+            >
+              Will you be my Valentine?
+            </motion.h1>
+
+            {/* Romantic GIF */}
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 80,
+                damping: 15,
+                delay: 0.5,
+              }}
+            >
+              <img
+                src={ASKING_GIF}
+                alt="Cute bear with a heart"
+                className="w-48 h-48 md:w-64 md:h-64 rounded-2xl object-cover"
+                style={{
+                  boxShadow: "0 8px 32px rgba(225, 29, 72, 0.2)",
+                }}
+              />
+            </motion.div>
+
+            {/* Buttons */}
+            <motion.div
+              className="flex items-center gap-4 mt-4"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              {/* Yes Button */}
+              <motion.button
+                onClick={handleYes}
+                className="rounded-full font-bold text-white cursor-pointer px-8 py-3 text-lg md:text-xl"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #e11d48, #be123c, #9f1239)",
+                  boxShadow: `0 0 ${15 + glowIntensity}px rgba(225, 29, 72, ${0.3 + glowIntensity / 100}), 0 0 ${30 + glowIntensity * 2}px rgba(225, 29, 72, ${0.1 + glowIntensity / 200})`,
+                  animation: "heartbeat 1.5s ease-in-out infinite",
+                }}
+                animate={{ scale: yesScale }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                whileHover={{ scale: yesScale * 1.08 }}
+                whileTap={{ scale: yesScale * 0.95 }}
+              >
+                Yes! 💖
+              </motion.button>
+
+              {/* No Button - in place or escaping */}
+              {!isNoEscaping && (
+                <motion.button
+                  onClick={evadeNo}
+                  onMouseEnter={evadeNo}
+                  className="rounded-full font-semibold cursor-pointer px-8 py-3 text-lg border-2"
+                  style={{
+                    background: "rgba(253, 164, 175, 0.6)",
+                    borderColor: "#f472b6",
+                    color: "#9f1239",
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {noText}
+                </motion.button>
+              )}
+            </motion.div>
+
+            {/* Escaped No Button - fixed position */}
+            {isNoEscaping && (
+              <motion.button
+                onClick={evadeNo}
+                onMouseEnter={evadeNo}
+                className="fixed rounded-full font-semibold cursor-pointer px-6 py-3 text-base z-50 border-2"
+                style={{
+                  background:
+                    noCount > 7
+                      ? "rgba(254, 205, 211, 0.9)"
+                      : "rgba(253, 164, 175, 0.7)",
+                  borderColor: noCount > 7 ? "#e11d48" : "#f472b6",
+                  color: "#9f1239",
+                  animation: noCount > 5 ? "shake 0.4s ease-in-out" : "none",
+                }}
+                animate={{
+                  left: noPosition.x,
+                  top: noPosition.y,
+                  rotate: noCount > 8 ? (noCount % 2 === 0 ? 5 : -5) : 0,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 12,
+                }}
+              >
+                {noText}
+                {noCount > 6 && (
+                  <motion.span
+                    className="ml-1"
+                    animate={{ scale: 1.3 }}
+                    transition={{
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      duration: 0.3,
+                    }}
+                  >
+                    😭
+                  </motion.span>
+                )}
+              </motion.button>
+            )}
+
+            {/* Encouraging sub-text that appears after a few "no"s */}
+            <AnimatePresence>
+              {noCount >= 3 && (
+                <motion.p
+                  className="text-base md:text-lg text-center mt-2"
+                  style={{ color: "#e11d48" }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {noCount < 6
+                    ? "The Yes button is getting bigger... just saying 👀"
+                    : noCount < 10
+                      ? "You can't escape love! 💘"
+                      : "At this point, it's basically destiny 💫"}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.main>
+        ) : (
+          <motion.main
+            key="celebrating"
+            className="celebrate-cursor relative z-10 flex flex-col items-center justify-center min-h-screen px-4 gap-8"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 80,
+              damping: 15,
+              delay: 0.2,
+            }}
           >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <CelebratingHearts />
+
+            {/* Celebration heading */}
+            <motion.h1
+              className="text-5xl md:text-7xl lg:text-8xl font-bold text-center"
+              style={{
+                fontFamily: "var(--font-dancing-script), cursive",
+                color: "#e11d48",
+              }}
+              initial={{ opacity: 0, y: -50, rotate: -5 }}
+              animate={{ opacity: 1, y: 0, rotate: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 100,
+                damping: 10,
+                delay: 0.3,
+              }}
+            >
+              Yay! 🎉
+            </motion.h1>
+
+            {/* Happy GIF */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0, rotate: -180 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 80,
+                damping: 12,
+                delay: 0.5,
+              }}
+            >
+              <img
+                src={CELEBRATE_GIF}
+                alt="Happy celebrating cats"
+                className="w-56 h-56 md:w-72 md:h-72 rounded-3xl object-cover"
+                style={{
+                  boxShadow: "0 12px 40px rgba(225, 29, 72, 0.3)",
+                }}
+              />
+            </motion.div>
+
+            {/* Sub-message */}
+            <motion.p
+              className="text-2xl md:text-3xl font-semibold text-center"
+              style={{ color: "#9f1239" }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              You + Me = Forever 💕
+            </motion.p>
+
+            <motion.p
+              className="text-lg md:text-xl text-center max-w-md"
+              style={{ color: "#be123c" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+            >
+              I knew you&apos;d say yes 😏
+              <br />
+              <span className="text-base opacity-70">
+                (the No button never stood a chance)
+              </span>
+            </motion.p>
+
+            {/* Pulsing heart */}
+            <motion.div
+              className="text-6xl md:text-8xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                type: "tween",
+              }}
+            >
+              💖
+            </motion.div>
+          </motion.main>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
