@@ -415,7 +415,7 @@ export default function Home() {
               I knew you&apos;d say yes 😏
               <br />
               <span className="text-base opacity-70">
-                (the No button never stood a chance)
+                (you were always my favorite answer)
               </span>
             </motion.p>
 
