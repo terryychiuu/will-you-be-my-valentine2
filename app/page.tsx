@@ -37,6 +37,49 @@ const CELEBRATION_HEARTS = [
   { id: 11, emoji: "✨", x: 13, delay: 2.4, duration: 5.8, size: 15 },
 ];
 
+const LOVE_LOOP_SPARKLES = [
+  {
+    id: 0,
+    emoji: "✨",
+    className: "-top-4 left-6 md:left-10",
+    x: [0, 10, -4, 0],
+    y: [0, -10, -18, 0],
+    rotate: [0, 18, -12, 0],
+    duration: 3.4,
+    delay: 0.1,
+  },
+  {
+    id: 1,
+    emoji: "💞",
+    className: "top-2 -right-2 md:right-2",
+    x: [0, 12, 4, 0],
+    y: [0, -14, 2, 0],
+    rotate: [0, -20, 8, 0],
+    duration: 4,
+    delay: 0.6,
+  },
+  {
+    id: 2,
+    emoji: "💕",
+    className: "-bottom-3 left-8 md:left-14",
+    x: [0, -12, -2, 0],
+    y: [0, 10, -6, 0],
+    rotate: [0, -16, 10, 0],
+    duration: 3.8,
+    delay: 1.1,
+  },
+  {
+    id: 3,
+    emoji: "✨",
+    className: "bottom-0 right-6 md:right-12",
+    x: [0, 8, -6, 0],
+    y: [0, 12, 2, 0],
+    rotate: [0, 15, -10, 0],
+    duration: 3.2,
+    delay: 0.4,
+  },
+];
+
 function FloatingHearts() {
   const hearts = ["💕", "💗", "💖", "❤️", "🩷", "💘", "💝", "🌸", "✨", "💓"];
   return (
@@ -418,6 +461,162 @@ export default function Home() {
                 (you were always my favorite answer)
               </span>
             </motion.p>
+
+            {/* Cindy & Charlie */}
+            <motion.div
+              className="relative mt-2"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: [0, -6, 0],
+              }}
+              transition={{
+                opacity: {
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 14,
+                  delay: 1.6,
+                },
+                scale: {
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 14,
+                  delay: 1.6,
+                },
+                y: {
+                  duration: 4.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  type: "tween",
+                  delay: 1.6,
+                },
+              }}
+            >
+              <motion.div
+                className="absolute inset-0 rounded-full blur-2xl"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(244, 114, 182, 0.28) 0%, rgba(253, 164, 175, 0.16) 45%, rgba(255, 255, 255, 0) 75%)",
+                }}
+                animate={{
+                  scale: [0.92, 1.08, 0.96],
+                  opacity: [0.35, 0.75, 0.35],
+                }}
+                transition={{
+                  duration: 3.6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  type: "tween",
+                }}
+              />
+
+              {LOVE_LOOP_SPARKLES.map((sparkle) => (
+                <motion.span
+                  key={sparkle.id}
+                  className={`absolute text-2xl md:text-3xl ${sparkle.className}`}
+                  animate={{
+                    x: sparkle.x,
+                    y: sparkle.y,
+                    rotate: sparkle.rotate,
+                    scale: [0.9, 1.15, 0.95, 0.9],
+                    opacity: [0.3, 1, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: sparkle.duration,
+                    delay: sparkle.delay,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    type: "tween",
+                  }}
+                >
+                  {sparkle.emoji}
+                </motion.span>
+              ))}
+
+              <motion.div
+                className="relative flex items-center gap-3 rounded-full px-6 py-4 md:px-8"
+                style={{
+                  background: "rgba(255, 255, 255, 0.45)",
+                  border: "1px solid rgba(244, 114, 182, 0.3)",
+                  boxShadow: "0 16px 40px rgba(225, 29, 72, 0.14)",
+                  backdropFilter: "blur(8px)",
+                }}
+                animate={{
+                  boxShadow: [
+                    "0 16px 40px rgba(225, 29, 72, 0.14)",
+                    "0 20px 50px rgba(225, 29, 72, 0.22)",
+                    "0 16px 40px rgba(225, 29, 72, 0.14)",
+                  ],
+                }}
+                transition={{
+                  duration: 3.6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  type: "tween",
+                }}
+              >
+                <motion.span
+                  className="text-3xl md:text-4xl"
+                  style={{
+                    fontFamily: "var(--font-dancing-script), cursive",
+                    color: "#e11d48",
+                  }}
+                  animate={{
+                    x: [0, -4, 2, 0],
+                    y: [0, -8, 0],
+                    rotate: [0, -7, 3, 0],
+                    scale: [1, 1.06, 0.98, 1],
+                  }}
+                  transition={{
+                    duration: 2.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    type: "tween",
+                  }}
+                >
+                  Cindy
+                </motion.span>
+                <motion.span
+                  className="text-4xl md:text-5xl"
+                  animate={{
+                    scale: [1, 1.35, 0.92, 1.18, 1],
+                    rotate: [0, -10, 10, -6, 0],
+                    y: [0, -10, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    type: "tween",
+                  }}
+                >
+                  💘
+                </motion.span>
+                <motion.span
+                  className="text-3xl md:text-4xl"
+                  style={{
+                    fontFamily: "var(--font-dancing-script), cursive",
+                    color: "#e11d48",
+                  }}
+                  animate={{
+                    x: [0, 4, -2, 0],
+                    y: [0, 8, 0],
+                    rotate: [0, 7, -3, 0],
+                    scale: [1, 0.98, 1.06, 1],
+                  }}
+                  transition={{
+                    duration: 2.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    type: "tween",
+                    delay: 0.2,
+                  }}
+                >
+                  Charlie
+                </motion.span>
+              </motion.div>
+            </motion.div>
 
             {/* Pulsing heart */}
             <motion.div
