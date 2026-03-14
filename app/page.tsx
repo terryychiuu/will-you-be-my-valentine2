@@ -1,29 +1,41 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 
 const NO_PHRASES = [
-  "No",
-  "Are you sure?",
-  "Really sure?",
-  "Think again!",
-  "Last chance!",
+  "No 🙈",
+  "Are you sure? 🥺",
+  "Really sure? 😳",
+  "Think again! 💭",
+  "Last chance! 💌",
   "Pretty please? 🥺",
-  "Don't do this to me!",
+  "Don't do this to me! 😩",
   "I'll cry... 😢",
   "You're breaking my heart! 💔",
-  "Okay fine, I won't ask again...",
   "Just kidding, PLEASE? 🙏",
   "I'll make you cookies! 🍪",
-  "What if I said pretty pretty please?",
-  "With a cherry on top? 🍒",
-  "I knew you'd say yes! 😏",
+  "What if I said pretty pretty please? ✨",
 ];
 
 const ASKING_GIF = "/giphy.gif";
 const CELEBRATE_GIF = "/giphy-celebrate.gif";
+const CELEBRATION_HEARTS = [
+  { id: 0, emoji: "💕", x: 8, delay: 0.1, duration: 4.2, size: 20 },
+  { id: 1, emoji: "💗", x: 16, delay: 0.7, duration: 5.1, size: 24 },
+  { id: 2, emoji: "💖", x: 24, delay: 1.3, duration: 4.8, size: 18 },
+  { id: 3, emoji: "❤️", x: 33, delay: 0.4, duration: 5.6, size: 28 },
+  { id: 4, emoji: "🩷", x: 41, delay: 1.8, duration: 4.5, size: 22 },
+  { id: 5, emoji: "✨", x: 49, delay: 0.9, duration: 5.9, size: 16 },
+  { id: 6, emoji: "💕", x: 57, delay: 2.1, duration: 4.3, size: 26 },
+  { id: 7, emoji: "💗", x: 65, delay: 0.2, duration: 5.4, size: 19 },
+  { id: 8, emoji: "💖", x: 73, delay: 1.1, duration: 4.9, size: 23 },
+  { id: 9, emoji: "❤️", x: 81, delay: 1.6, duration: 5.2, size: 27 },
+  { id: 10, emoji: "🩷", x: 89, delay: 0.6, duration: 4.7, size: 21 },
+  { id: 11, emoji: "✨", x: 13, delay: 2.4, duration: 5.8, size: 15 },
+];
 
 function FloatingHearts() {
   const hearts = ["💕", "💗", "💖", "❤️", "🩷", "💘", "💝", "🌸", "✨", "💓"];
@@ -93,24 +105,15 @@ function fireConfetti() {
 }
 
 function CelebratingHearts() {
-  const hearts = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    emoji: ["💕", "💗", "💖", "❤️", "🩷", "✨"][i % 6],
-    x: Math.random() * 100,
-    delay: Math.random() * 3,
-    duration: 4 + Math.random() * 4,
-    size: 16 + Math.random() * 24,
-  }));
-
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {hearts.map((h) => (
+      {CELEBRATION_HEARTS.map((h) => (
         <motion.span
           key={h.id}
           className="absolute"
           style={{ left: `${h.x}%`, fontSize: h.size, bottom: -40 }}
           animate={{
-            y: [0, -window.innerHeight - 100],
+            y: ["0vh", "-120vh"],
             rotate: [0, 360],
             opacity: [0, 0.8, 0.6, 0],
           }}
@@ -138,6 +141,13 @@ export default function Home() {
 
   const yesScale = Math.min(1 + noCount * 0.18, 3.5);
   const glowIntensity = Math.min(noCount * 8, 60);
+  const noShrinkStart = 7;
+  const noDisappearCount = 12;
+  const noScale =
+    noCount < noShrinkStart
+      ? 1
+      : Math.max(0, 1 - (noCount - noShrinkStart + 1) * 0.2);
+  const noHasDisappeared = noCount >= noDisappearCount;
 
   const evadeNo = useCallback(() => {
     const padding = 100;
@@ -162,12 +172,6 @@ export default function Home() {
     // Second wave of confetti
     setTimeout(fireConfetti, 1500);
   }, []);
-
-  // SSR guard for window usage
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) return null;
 
   return (
     <div className="animated-gradient min-h-screen relative overflow-hidden">
@@ -214,10 +218,12 @@ export default function Home() {
                 delay: 0.5,
               }}
             >
-              <img
+              <Image
                 src={ASKING_GIF}
                 alt="Cute bear with a heart"
                 className="w-48 h-48 md:w-64 md:h-64 rounded-2xl object-cover"
+                width={256}
+                height={256}
                 style={{
                   boxShadow: "0 8px 32px rgba(225, 29, 72, 0.2)",
                 }}
@@ -250,7 +256,7 @@ export default function Home() {
               </motion.button>
 
               {/* No Button - in place or escaping */}
-              {!isNoEscaping && (
+              {!isNoEscaping && !noHasDisappeared && (
                 <motion.button
                   onClick={evadeNo}
                   onMouseEnter={evadeNo}
@@ -268,7 +274,7 @@ export default function Home() {
             </motion.div>
 
             {/* Escaped No Button - fixed position */}
-            {isNoEscaping && (
+            {isNoEscaping && !noHasDisappeared && (
               <motion.button
                 onClick={evadeNo}
                 onMouseEnter={evadeNo}
@@ -285,6 +291,8 @@ export default function Home() {
                 animate={{
                   left: noPosition.x,
                   top: noPosition.y,
+                  scale: noScale,
+                  opacity: Math.max(0.15, noScale),
                   rotate: noCount > 8 ? (noCount % 2 === 0 ? 5 : -5) : 0,
                 }}
                 transition={{
@@ -374,10 +382,12 @@ export default function Home() {
                 delay: 0.5,
               }}
             >
-              <img
+              <Image
                 src={CELEBRATE_GIF}
                 alt="Happy celebrating cats"
                 className="w-56 h-56 md:w-72 md:h-72 rounded-3xl object-cover"
+                width={288}
+                height={288}
                 style={{
                   boxShadow: "0 12px 40px rgba(225, 29, 72, 0.3)",
                 }}
